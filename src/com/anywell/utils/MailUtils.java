@@ -17,14 +17,14 @@ public class MailUtils {
 
 	public static void sendMail(String email, String emailMsg)
 			throws AddressException, MessagingException {
-		// 1.´´½¨Ò»¸ö³ÌĞòÓëÓÊ¼ş·şÎñÆ÷»á»°¶ÔÏó Session
+		// 1.åˆ›å»ºä¸€ä¸ªç¨‹åºä¸é‚®ä»¶æœåŠ¡å™¨ä¼šè¯å¯¹è±¡ Session
 
 		Properties props = new Properties();
 		props.setProperty("mail.transport.protocol", "SMTP");
 		props.setProperty("mail.host", "smtp.126.com");
-		props.setProperty("mail.smtp.auth", "true");// Ö¸¶¨ÑéÖ¤Îªtrue
+		props.setProperty("mail.smtp.auth", "true");// æŒ‡å®šéªŒè¯ä¸ºtrue
 
-		// ´´½¨ÑéÖ¤Æ÷
+		// åˆ›å»ºéªŒè¯å™¨
 		Authenticator auth = new Authenticator() {
 			public PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication("haohao_itcast", "hao12345");
@@ -33,19 +33,19 @@ public class MailUtils {
 
 		Session session = Session.getInstance(props, auth);
 
-		// 2.´´½¨Ò»¸öMessage£¬ËüÏàµ±ÓÚÊÇÓÊ¼şÄÚÈİ
+		// 2.åˆ›å»ºä¸€ä¸ªMessageï¼Œå®ƒç›¸å½“äºæ˜¯é‚®ä»¶å†…å®¹
 		Message message = new MimeMessage(session);
 
-		message.setFrom(new InternetAddress("haohao_itcast@126.com")); // ÉèÖÃ·¢ËÍÕß
+		message.setFrom(new InternetAddress("haohao_itcast@126.com")); // è®¾ç½®å‘é€è€…
 
-		message.setRecipient(RecipientType.TO, new InternetAddress(email)); // ÉèÖÃ·¢ËÍ·½Ê½Óë½ÓÊÕÕß
+		message.setRecipient(RecipientType.TO, new InternetAddress(email)); // è®¾ç½®å‘é€æ–¹å¼ä¸æ¥æ”¶è€…
 
-		message.setSubject("ÓÃ»§¼¤»î");
-		// message.setText("ÕâÊÇÒ»·â¼¤»îÓÊ¼ş£¬Çë<a href='#'>µã»÷</a>");
+		message.setSubject("ç”¨æˆ·æ¿€æ´»");
+		// message.setText("è¿™æ˜¯ä¸€å°æ¿€æ´»é‚®ä»¶ï¼Œè¯·<a href='#'>ç‚¹å‡»</a>");
 
 		message.setContent(emailMsg, "text/html;charset=utf-8");
 
-		// 3.´´½¨ TransportÓÃÓÚ½«ÓÊ¼ş·¢ËÍ
+		// 3.åˆ›å»º Transportç”¨äºå°†é‚®ä»¶å‘é€
 
 		Transport.send(message);
 	}
