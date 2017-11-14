@@ -39,7 +39,7 @@ public class DataSourceUtils {
 		}
 	}
 
-	// 事务回滚
+	// 回滚
 	public static void rollback() throws SQLException {
 		Connection con = getConnection();
 		if (con != null) {
@@ -47,17 +47,17 @@ public class DataSourceUtils {
 		}
 	}
 
-	// 提交并且 关闭资源及从ThreadLocall中释放
+	// 鎻愪氦骞朵笖 鍏抽棴璧勬簮鍙婁粠ThreadLocall涓噴鏀�	
 	public static void commitAndRelease() throws SQLException {
 		Connection con = getConnection();
 		if (con != null) {
-			con.commit(); // 事务提交
-			con.close();// 关闭资源
-			tl.remove();// 从线程绑定中移除
+			con.commit(); // 浜嬪姟鎻愪氦
+			con.close();// 鍏抽棴璧勬簮
+			tl.remove();// 浠庣嚎绋嬬粦瀹氫腑绉婚櫎
 		}
 	}
 
-	// 关闭资源方法
+	// 鍏抽棴璧勬簮鏂规硶
 	public static void closeConnection() throws SQLException {
 		Connection con = getConnection();
 		if (con != null) {

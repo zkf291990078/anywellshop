@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import org.apache.commons.beanutils.Converter;
 import com.anywell.domain.User;
 import com.anywell.service.UserService;
 import com.anywell.utils.CommonsUtils;
+import com.anywell.utils.MailUtils;
 
 /**
  * Servlet implementation class RegisterServlet
@@ -58,6 +61,17 @@ public class RegisterServlet extends HttpServlet {
 		UserService userService=new UserService();
 	   boolean isRegisterSuccess=	userService.register(user);
 	   if(isRegisterSuccess){
+		   String emailMsg="点击激活用户<a href='http://localhost:8080/anywellShop/active?activeCode="+user.getCode()+
+				   "'>http://localhost:8080/anywellShop/active?activeCode="+user.getCode()+"</a>";
+		   try {
+			MailUtils.sendMail(user.getEmail(), emailMsg);
+		} catch (AddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		   response.sendRedirect(request.getContextPath()+"/registerSuccess.jsp");
 	   }else{
 		   response.sendRedirect(request.getContextPath()+"/registerFail.jsp");
