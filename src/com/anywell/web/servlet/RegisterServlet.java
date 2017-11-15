@@ -61,7 +61,7 @@ public class RegisterServlet extends HttpServlet {
 		UserService userService=new UserService();
 	   boolean isRegisterSuccess=	userService.register(user);
 	   if(isRegisterSuccess){
-		   String emailMsg="µã»÷¼¤»îÓÃ»§<a href='http://localhost:8080/anywellShop/active?activeCode="+user.getCode()+
+		   String emailMsg="æ¿€æ´»ç”¨æˆ·<a href='http://localhost:8080/anywellShop/active?activeCode="+user.getCode()+
 				   "'>http://localhost:8080/anywellShop/active?activeCode="+user.getCode()+"</a>";
 		   try {
 			MailUtils.sendMail(user.getEmail(), emailMsg);

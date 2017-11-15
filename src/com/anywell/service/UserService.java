@@ -24,7 +24,6 @@ public class UserService {
 	} catch (Exception e) {
 		// TODO: handle exception
 	}
-	
 	return row>0?true:false;
 	}
 }
