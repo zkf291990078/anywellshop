@@ -42,9 +42,10 @@ body {
 		</div>
 		<c:forEach items="${pageBean.list}" var="pro">
 			<div class="col-md-2" style="height: 250px">
-				<a href="product_info.htm"> <img
-					src="${pageContext.request.contextPath}/${pro.pimage}" width="170"
-					height="170" style="display: inline-block;">
+				<a
+					href="${pageContext.request.contextPath}/productInfo?pid=${pro.pid}&currentPage=${pageBean.currentPage}&cid=${cid}">
+					<img src="${pageContext.request.contextPath}/${pro.pimage}"
+					width="170" height="170" style="display: inline-block;">
 				</a>
 				<p>
 					<a href="product_info.html" style='color: green'>${pro.pname}</a>
@@ -59,19 +60,29 @@ body {
 	<!--分页 -->
 	<div style="width: 380px; margin: 0 auto; margin-top: 50px;">
 		<ul class="pagination" style="text-align: center; margin-top: 10px;">
-			<li class="disabled"><a href="#" aria-label="Previous"><span
-					aria-hidden="true">&laquo;</span></a></li>
-			<li class="active"><a href="#">1</a></li>
-			<li><a href="#">2</a></li>
-			<li><a href="#">3</a></li>
-			<li><a href="#">4</a></li>
-			<li><a href="#">5</a></li>
-			<li><a href="#">6</a></li>
-			<li><a href="#">7</a></li>
-			<li><a href="#">8</a></li>
-			<li><a href="#">9</a></li>
-			<li><a href="#" aria-label="Next"> <span aria-hidden="true">&raquo;</span>
-			</a></li>
+			<c:if test="${pageBean.currentPage==1 }">
+				<li class="disabled"><a href="javascript:void(0)"
+					aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+			</c:if>
+			<c:if test="${pageBean.currentPage!=1 }">
+				<li><a
+					href="${pageContext.request.contextPath}/productListBycid?cid=${cid}&currentPage=${pageBean.currentPage-1}"
+					aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+			</c:if>
+			<c:forEach begin="1" end="${pageBean.totalPage}" var="page">
+				<li><a
+					href="${pageContext.request.contextPath}/productLi stBycid?cid=${cid}&currentPage=${page}">${page}</a></li>
+			</c:forEach>
+
+			<c:if test="${pageBean.currentPage==pageBean.totalPage }">
+				<li class="disabled"><a href="javascript:void(0)"
+					aria-label="Next"> <span aria-hidden="true">&raquo;</span></a></li>
+			</c:if>
+			<c:if test="${pageBean.currentPage!=pageBean.totalPage }">
+				<li class="disabled"><a
+					href="${pageContext.request.contextPath}/productListBycid?cid=${cid}&currentPage=${pageBean.currentPage+1}"
+					aria-label="Next"> <span aria-hidden="true">&raquo;</span></a></li>
+			</c:if>
 		</ul>
 	</div>
 	<!-- 分页结束 -->
@@ -89,9 +100,12 @@ body {
 		<div style="overflow: hidden;">
 
 			<ul style="list-style: none;">
-				<li
-					style="width: 150px; height: 216; float: left; margin: 0 8px 0 0; padding: 0 18px 15px; text-align: center;"><img
-					src="products/1/cs10001.jpg" width="130px" height="130px" /></li>
+				<c:forEach items="${history }" var="pro">
+					<li
+						style="width: 150px; height: 216; float: left; margin: 0 8px 0 0; padding: 0 18px 15px; text-align: center;"><img
+						src="${pageContext.request.contextPath }/${pro.pimage}"
+						width="130px" height="130px" /></li>
+				</c:forEach>
 			</ul>
 
 		</div>

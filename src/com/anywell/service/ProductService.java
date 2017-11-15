@@ -3,10 +3,9 @@ package com.anywell.service;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.commons.fileupload.ParameterParser;
-
 import com.anywell.dao.ProductDao;
 import com.anywell.domain.Category;
+import com.anywell.domain.PageBean;
 import com.anywell.domain.Product;
 
 public class ProductService {
@@ -47,16 +46,44 @@ public class ProductService {
 		return cateList;
 	}
 
-	public List<Product> findProuctsBycid(String cid, int index, int pageCount) {
+	public PageBean<Product> findProuctsBycid(String cid, int currentPage, int currentCount) {
 		ProductDao dao = new ProductDao();
-		List<Product> products = null;
+		PageBean<Product> pageBean = new PageBean<Product>();
+		pageBean.setCurrentCount(currentCount);
+		pageBean.setCurrentPage(currentPage);
+		int totalCount = 0;
 		try {
-			products = dao.findProductsBycid(cid, index, pageCount);
+			totalCount = dao.getCount(cid);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return products;
+		pageBean.setTotalCount(totalCount);
+		int totalPage = (int) Math.ceil(1.0 * totalCount / currentCount);
+		pageBean.setTotalPage(totalPage);
+		List<Product> products = null;
+		int index = (currentPage - 1) * currentCount;
+		try {
+			products = dao.findProductsBycid(cid, index, currentCount);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		pageBean.setList(products);
+		return pageBean;
+	}
+
+	public Product findProductById(String pid) {
+		// TODO Auto-generated method stub
+		ProductDao dao = new ProductDao();
+		Product pro = null;
+		try {
+			pro = dao.findProductById(pid);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return pro;
 	}
 
 }
