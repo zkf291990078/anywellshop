@@ -3,9 +3,11 @@ package com.anywell.web.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -16,9 +18,13 @@ import javax.servlet.http.HttpSession;
 import com.anywell.domain.Cart;
 import com.anywell.domain.CartItem;
 import com.anywell.domain.Category;
+import com.anywell.domain.Order;
+import com.anywell.domain.OrderItem;
 import com.anywell.domain.PageBean;
 import com.anywell.domain.Product;
+import com.anywell.domain.User;
 import com.anywell.service.ProductService;
+import com.anywell.utils.CommonsUtils;
 import com.google.gson.Gson;
 
 /**
@@ -46,41 +52,78 @@ public class ProductServlet extends BaseServlet {
 	// // TODO Auto-generated method stub
 	// doGet(request, response);
 	// }
+	
+	public void submitOrder(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		if (user == null) {
+			response.sendRedirect(request.getContextPath() + "/login.jsp");
+			return;
+		}
+		Order order = new Order();
+		Cart cart = (Cart) session.getAttribute("cart");
+		if (cart == null) {
+			throw new RuntimeException("购物车没有数据");
+		}
+		order.setAddress(null);
+		order.setName(null);
+		order.setOid(CommonsUtils.getUUID());
+		for (Entry<String, CartItem> entry : cart.getCartItems().entrySet()) {
+			CartItem cartItem = entry.getValue();
+			OrderItem orderItem = new OrderItem();
+			orderItem.setCount(cartItem.getBuyNum());
+			orderItem.setItemid(CommonsUtils.getUUID());
+			orderItem.setOrder(order);
+			orderItem.setProduct(cartItem.getProduct());
+			orderItem.setSubtotal(cartItem.getSubTotal());
+			order.getOrderItems().add(orderItem);
+		}
+		order.setOrdertime(new Date());
+		order.setState(0);
+		order.setTelephone(null);
+		order.setTotal(cart.getTotalPrice());
+		order.setUser(user);
+		ProductService service=new ProductService();
+		service.submitOrder(order);
+		request.getSession().setAttribute("order", order);
+		response.sendRedirect(request.getContextPath()+"/order_info.jsp");
+	}
 
 	// 清空购物车
-	 public void clearCart(HttpServletRequest request, HttpServletResponse
-	 response) throws ServletException, IOException {
-	 HttpSession session = request.getSession();
-	 session.removeAttribute("cart");
-	
-	 //跳转回cart.jsp
-	 response.sendRedirect(request.getContextPath()+"/cart.jsp");
-	
-	 }
+	public void clearCart(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		session.removeAttribute("cart");
+
+		// 跳转回cart.jsp
+		response.sendRedirect(request.getContextPath() + "/cart.jsp");
+
+	}
 
 	// 删除单一商品
-	 public void delProFromCart(HttpServletRequest request,
-	 HttpServletResponse response) throws ServletException, IOException {
-	 //获得要删除的item的pid
-	 String pid = request.getParameter("pid");
-	 //删除session中的购物车中的购物项集合中的item
-	 HttpSession session = request.getSession();
-	 Cart cart = (Cart) session.getAttribute("cart");
-	 if(cart!=null){
-	 Map<String, CartItem> cartItems = cart.getCartItems();
-	 //需要修改总价
-	 cart.setTotalPrice(cart.getTotalPrice()-cartItems.get(pid).getSubTotal());
-	 //删除
-	 cartItems.remove(pid);
-	 cart.setCartItems(cartItems);
-	
-	 }
-	
-	 session.setAttribute("cart", cart);
-	
-	 //跳转回cart.jsp
-	 response.sendRedirect(request.getContextPath()+"/cart.jsp");
-	 }
+	public void delProFromCart(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// 获得要删除的item的pid
+		String pid = request.getParameter("pid");
+		// 删除session中的购物车中的购物项集合中的item
+		HttpSession session = request.getSession();
+		Cart cart = (Cart) session.getAttribute("cart");
+		if (cart != null) {
+			Map<String, CartItem> cartItems = cart.getCartItems();
+			// 需要修改总价
+			cart.setTotalPrice(cart.getTotalPrice() - cartItems.get(pid).getSubTotal());
+			// 删除
+			cartItems.remove(pid);
+			cart.setCartItems(cartItems);
+
+		}
+
+		session.setAttribute("cart", cart);
+
+		// 跳转回cart.jsp
+		response.sendRedirect(request.getContextPath() + "/cart.jsp");
+	}
 
 	// 将商品添加到购物车
 	public void addProductToCart(HttpServletRequest request, HttpServletResponse response)
@@ -88,32 +131,32 @@ public class ProductServlet extends BaseServlet {
 
 		String pid = request.getParameter("pid");
 		int buyNum = Integer.parseInt(request.getParameter("buyNum"));
-		HttpSession session= request.getSession();
-		ProductService service=new ProductService();
-		Product product= service.findProductById(pid);
-		CartItem item=new CartItem();
+		HttpSession session = request.getSession();
+		ProductService service = new ProductService();
+		Product product = service.findProductById(pid);
+		CartItem item = new CartItem();
 		item.setBuyNum(buyNum);
 		item.setProduct(product);
-		double subTotal=product.getShop_price()*buyNum;
+		double subTotal = product.getShop_price() * buyNum;
 		item.setSubTotal(subTotal);
-		
-		Cart cart=(Cart) session.getAttribute("cart");
-		if(cart!=null){
-			if(cart.getCartItems().containsKey(product.getPid())){
-				cart.getCartItems().get(pid).setBuyNum(cart.getCartItems().get(pid).getBuyNum()+buyNum);
-				cart.getCartItems().get(pid).setSubTotal(cart.getCartItems().get(pid).getSubTotal()+subTotal);
-				cart.setTotalPrice(cart.getTotalPrice()+subTotal);
-			}else{
+
+		Cart cart = (Cart) session.getAttribute("cart");
+		if (cart != null) {
+			if (cart.getCartItems().containsKey(product.getPid())) {
+				cart.getCartItems().get(pid).setBuyNum(cart.getCartItems().get(pid).getBuyNum() + buyNum);
+				cart.getCartItems().get(pid).setSubTotal(cart.getCartItems().get(pid).getSubTotal() + subTotal);
+				cart.setTotalPrice(cart.getTotalPrice() + subTotal);
+			} else {
 				cart.getCartItems().put(pid, item);
-				cart.setTotalPrice(cart.getTotalPrice()+subTotal);
+				cart.setTotalPrice(cart.getTotalPrice() + subTotal);
 			}
-		}else{
-			cart=new Cart();
+		} else {
+			cart = new Cart();
 			cart.getCartItems().put(pid, item);
 			cart.setTotalPrice(subTotal);
 		}
 		session.setAttribute("cart", cart);
-		response.sendRedirect(request.getContextPath()+"/cart.jsp");
+		response.sendRedirect(request.getContextPath() + "/cart.jsp");
 	}
 
 	// 显示商品的类别的的功能

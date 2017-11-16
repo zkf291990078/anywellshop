@@ -1,5 +1,7 @@
 package com.anywell.service;
 
+import java.sql.SQLException;
+
 import com.anywell.dao.UserDao;
 import com.anywell.domain.User;
 
@@ -25,5 +27,9 @@ public class UserService {
 		// TODO: handle exception
 	}
 	return row>0?true:false;
+	}
+	public User login(String username, String password) throws SQLException {
+		UserDao dao = new UserDao();
+		return dao.login(username,password);
 	}
 }

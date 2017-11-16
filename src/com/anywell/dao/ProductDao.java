@@ -1,5 +1,6 @@
 package com.anywell.dao;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -9,6 +10,8 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.anywell.domain.Category;
+import com.anywell.domain.Order;
+import com.anywell.domain.OrderItem;
 import com.anywell.domain.Product;
 import com.anywell.utils.DataSourceUtils;
 
@@ -53,5 +56,25 @@ public class ProductDao {
 		QueryRunner queryRunner = new QueryRunner(DataSourceUtils.getDataSource());
 		String sql = "select * from product where pid=? ";
 		return queryRunner.query(sql, new BeanHandler<>(Product.class), pid);
+	}
+
+	public void saveOrderItems(Order order) throws SQLException {
+		// TODO Auto-generated method stub
+		Connection conn = DataSourceUtils.getConnection();
+		QueryRunner queryRunner = new QueryRunner();
+		String sql = "insert into orderItem values (?,?,?,?,?)";
+		for (OrderItem item : order.getOrderItems()) {
+			queryRunner.update(conn, sql, item.getItemid(), item.getCount(), item.getSubtotal(),
+					item.getProduct().getPid(), item.getOrder().getOid());
+		}
+	}
+
+	public void saveOrder(Order order) throws SQLException {
+		// TODO Auto-generated method stub
+		Connection conn = DataSourceUtils.getConnection();
+		QueryRunner queryRunner = new QueryRunner();
+		String sql = "insert into orders values (?,?,?,?,?,?,?,?)";
+		queryRunner.update(conn, sql, order.getOid(), order.getOrdertime(), order.getTotal(), order.getState(),
+				order.getAddress(), order.getName(), order.getTelephone(), order.getUser().getUid());
 	}
 }

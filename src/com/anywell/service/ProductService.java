@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.anywell.dao.ProductDao;
 import com.anywell.domain.Category;
+import com.anywell.domain.Order;
 import com.anywell.domain.PageBean;
 import com.anywell.domain.Product;
+import com.anywell.utils.DataSourceUtils;
 
 public class ProductService {
 
@@ -84,6 +86,32 @@ public class ProductService {
 			e.printStackTrace();
 		}
 		return pro;
+	}
+
+	public void submitOrder(Order order) {
+		// TODO Auto-generated method stub
+		try {
+			DataSourceUtils.startTransaction();
+			ProductDao dao=new ProductDao();
+			dao.saveOrder(order);
+			dao.saveOrderItems(order);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				DataSourceUtils.rollback();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}finally {
+			try {
+				DataSourceUtils.commitAndRelease();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
