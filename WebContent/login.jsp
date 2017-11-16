@@ -58,7 +58,7 @@ font {
 						<div class="form-group">
 							<label for="username" class="col-sm-2 control-label">用户名</label>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" id="username"
+								<input type="text" class="form-control" id="username" name="username"
 									placeholder="请输入用户名">
 									<input type="hidden" name="method" value="login">
 							</div>
@@ -66,7 +66,7 @@ font {
 						<div class="form-group">
 							<label for="inputPassword3" class="col-sm-2 control-label">密码</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="inputPassword3"
+								<input type="password" class="form-control" id="inputPassword3" name="password"
 									placeholder="请输入密码">
 							</div>
 						</div>
