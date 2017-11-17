@@ -2,6 +2,7 @@ package com.anywell.service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import com.anywell.dao.ProductDao;
 import com.anywell.domain.Category;
@@ -92,7 +93,7 @@ public class ProductService {
 		// TODO Auto-generated method stub
 		try {
 			DataSourceUtils.startTransaction();
-			ProductDao dao=new ProductDao();
+			ProductDao dao = new ProductDao();
 			dao.saveOrder(order);
 			dao.saveOrderItems(order);
 		} catch (SQLException e) {
@@ -104,7 +105,7 @@ public class ProductService {
 				e1.printStackTrace();
 			}
 			e.printStackTrace();
-		}finally {
+		} finally {
 			try {
 				DataSourceUtils.commitAndRelease();
 			} catch (SQLException e) {
@@ -113,6 +114,7 @@ public class ProductService {
 			}
 		}
 	}
+
 	public void updateOrderAdrr(Order order) {
 		ProductDao dao = new ProductDao();
 		try {
@@ -132,4 +134,41 @@ public class ProductService {
 		}
 	}
 
+	public List<Order> findAllOrders(String uid, int currentPage, int currentCount) {
+		// TODO Auto-generated method stub
+		ProductDao dao = new ProductDao();
+		List<Order> orders = null;
+		try {
+			orders = dao.findAllOrders(uid, currentPage, currentCount);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return orders;
+	}
+
+	public int getOrdersCount() {
+		ProductDao dao = new ProductDao();
+		int count = 0;
+		try {
+			count = dao.getOrdersCount();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return count;
+	}
+
+	public List<Map<String, Object>> findAllOrderItems(String oid) {
+		// TODO Auto-generated method stub
+		ProductDao dao = new ProductDao();
+		List<Map<String, Object>> orderItems = null;
+		try {
+			orderItems = dao.findAllOrderItems(oid);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return orderItems;
+	}
 }

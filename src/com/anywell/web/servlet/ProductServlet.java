@@ -59,84 +59,117 @@ public class ProductServlet extends BaseServlet {
 	// // TODO Auto-generated method stub
 	// doGet(request, response);
 	// }
-	
-	//确认订单---更新收获人信息+在线支付
-		public void confirmOrder(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-			//1、更新收货人信息
-			Map<String, String[]> properties = request.getParameterMap();
-			Order order = new Order();
-			try {
-				BeanUtils.populate(order, properties);
-			} catch (IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
-			}
-
-			ProductService service = new ProductService();
-			service.updateOrderAdrr(order);
-
-			//2、在线支付
-			/*if(pd_FrpId.equals("ABC-NET-B2C")){
-				//介入农行的接口
-			}else if(pd_FrpId.equals("ICBC-NET-B2C")){
-				//接入工行的接口
-			}*/
-			//.......
-
-			//只接入一个接口，这个接口已经集成所有的银行接口了  ，这个接口是第三方支付平台提供的
-			//接入的是易宝支付
-			// 获得 支付必须基本数据
-			String orderid = request.getParameter("oid");
-			//String money = order.getTotal()+"";//支付金额
-			String money = "0.01";//支付金额
-			// 银行
-			String pd_FrpId = request.getParameter("pd_FrpId");
-
-			// 发给支付公司需要哪些数据
-			String p0_Cmd = "Buy";
-			String p1_MerId = ResourceBundle.getBundle("merchantInfo").getString("p1_MerId");
-			String p2_Order = orderid;
-			String p3_Amt = money;
-			String p4_Cur = "CNY";
-			String p5_Pid = "";
-			String p6_Pcat = "";
-			String p7_Pdesc = "";
-			// 支付成功回调地址 ---- 第三方支付公司会访问、用户访问
-			// 第三方支付可以访问网址
-			String p8_Url = ResourceBundle.getBundle("merchantInfo").getString("callback");
-			String p9_SAF = "";
-			String pa_MP = "";
-			String pr_NeedResponse = "1";
-			// 加密hmac 需要密钥
-			String keyValue = ResourceBundle.getBundle("merchantInfo").getString(
-					"keyValue");
-			String hmac = PaymentUtil.buildHmac(p0_Cmd, p1_MerId, p2_Order, p3_Amt,
-					p4_Cur, p5_Pid, p6_Pcat, p7_Pdesc, p8_Url, p9_SAF, pa_MP,
-					pd_FrpId, pr_NeedResponse, keyValue);
-
-
-			String url = "https://www.yeepay.com/app-merchant-proxy/node?pd_FrpId="+pd_FrpId+
-					"&p0_Cmd="+p0_Cmd+
-					"&p1_MerId="+p1_MerId+
-					"&p2_Order="+p2_Order+
-					"&p3_Amt="+p3_Amt+
-					"&p4_Cur="+p4_Cur+
-					"&p5_Pid="+p5_Pid+
-					"&p6_Pcat="+p6_Pcat+
-					"&p7_Pdesc="+p7_Pdesc+
-					"&p8_Url="+p8_Url+
-					"&p9_SAF="+p9_SAF+
-					"&pa_MP="+pa_MP+
-					"&pr_NeedResponse="+pr_NeedResponse+
-					"&hmac="+hmac;
-
-			//重定向到第三方支付平台
-			response.sendRedirect(url);
-
-
+	public void orderList(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		User user = (User) session.getAttribute("user");
+		if (user == null) {
+			response.sendRedirect(request.getContextPath() + "/login.jsp");
+			return;
 		}
-	
-	
+		String page = request.getParameter("currentPage");
+		int currentPage = 0;
+		if (page == null) {
+			currentPage = 1;
+		} else {
+			currentPage = Integer.parseInt(page);
+		}
+		PageBean<Order> pageBean = new PageBean<>();
+		pageBean.setCurrentCount(3);
+		pageBean.setCurrentPage(currentPage);
+
+		ProductService service = new ProductService();
+		List<Order> orders = service.findAllOrders(user.getUid(), currentPage, 3);
+		for (Order order : orders) {
+
+			List<Map<String, Object>> orderItems = service.findAllOrderItems(order.getOid());
+			for (Map<String, Object> map : orderItems) {
+				OrderItem orderItem = new OrderItem();
+				Product product = new Product();
+				try {
+					BeanUtils.populate(product, map);
+					BeanUtils.populate(orderItem, map);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				orderItem.setProduct(product);
+				orderItem.setOrder(order);
+				order.getOrderItems().add(orderItem);
+			}
+		}
+		int totalCount = service.getOrdersCount();
+		pageBean.setTotalCount(totalCount);
+		pageBean.setList(orders);
+		int pageCount = (int) Math.ceil(1.0 * totalCount / 3);
+		pageBean.setTotalPage(pageCount);
+		request.setAttribute("orderPage", pageBean);
+		request.getRequestDispatcher("/order_list.jsp").forward(request, response);
+	}
+
+	// 确认订单---更新收获人信息+在线支付
+	public void confirmOrder(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// 1、更新收货人信息
+		Map<String, String[]> properties = request.getParameterMap();
+		Order order = new Order();
+		try {
+			BeanUtils.populate(order, properties);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+
+		ProductService service = new ProductService();
+		service.updateOrderAdrr(order);
+
+		// 2、在线支付
+		/*
+		 * if(pd_FrpId.equals("ABC-NET-B2C")){ //介入农行的接口 }else
+		 * if(pd_FrpId.equals("ICBC-NET-B2C")){ //接入工行的接口 }
+		 */
+		// .......
+
+		// 只接入一个接口，这个接口已经集成所有的银行接口了 ，这个接口是第三方支付平台提供的
+		// 接入的是易宝支付
+		// 获得 支付必须基本数据
+		String orderid = request.getParameter("oid");
+		// String money = order.getTotal()+"";//支付金额
+		String money = "0.01";// 支付金额
+		// 银行
+		String pd_FrpId = request.getParameter("pd_FrpId");
+
+		// 发给支付公司需要哪些数据
+		String p0_Cmd = "Buy";
+		String p1_MerId = ResourceBundle.getBundle("merchantInfo").getString("p1_MerId");
+		String p2_Order = orderid;
+		String p3_Amt = money;
+		String p4_Cur = "CNY";
+		String p5_Pid = "";
+		String p6_Pcat = "";
+		String p7_Pdesc = "";
+		// 支付成功回调地址 ---- 第三方支付公司会访问、用户访问
+		// 第三方支付可以访问网址
+		String p8_Url = ResourceBundle.getBundle("merchantInfo").getString("callback");
+		String p9_SAF = "";
+		String pa_MP = "";
+		String pr_NeedResponse = "1";
+		// 加密hmac 需要密钥
+		String keyValue = ResourceBundle.getBundle("merchantInfo").getString("keyValue");
+		String hmac = PaymentUtil.buildHmac(p0_Cmd, p1_MerId, p2_Order, p3_Amt, p4_Cur, p5_Pid, p6_Pcat, p7_Pdesc,
+				p8_Url, p9_SAF, pa_MP, pd_FrpId, pr_NeedResponse, keyValue);
+
+		String url = "https://www.yeepay.com/app-merchant-proxy/node?pd_FrpId=" + pd_FrpId + "&p0_Cmd=" + p0_Cmd
+				+ "&p1_MerId=" + p1_MerId + "&p2_Order=" + p2_Order + "&p3_Amt=" + p3_Amt + "&p4_Cur=" + p4_Cur
+				+ "&p5_Pid=" + p5_Pid + "&p6_Pcat=" + p6_Pcat + "&p7_Pdesc=" + p7_Pdesc + "&p8_Url=" + p8_Url
+				+ "&p9_SAF=" + p9_SAF + "&pa_MP=" + pa_MP + "&pr_NeedResponse=" + pr_NeedResponse + "&hmac=" + hmac;
+
+		// 重定向到第三方支付平台
+		response.sendRedirect(url);
+
+	}
+
 	public void submitOrder(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		HttpSession session = request.getSession();
@@ -163,25 +196,25 @@ public class ProductServlet extends BaseServlet {
 			orderItem.setSubtotal(cartItem.getSubTotal());
 			order.getOrderItems().add(orderItem);
 		}
-		Date date=new Date();                             
-        SimpleDateFormat temp=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
-        String date2=temp.format(date);  
-        Date date3=null;
+		Date date = new Date();
+		SimpleDateFormat temp = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		String date2 = temp.format(date);
+		Date date3 = null;
 		try {
 			date3 = temp.parse(date2);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}  
-       order.setOrdertime(date3);
+		}
+		order.setOrdertime(date3);
 		order.setState(0);
 		order.setTelephone(null);
 		order.setTotal(cart.getTotalPrice());
 		order.setUser(user);
-		ProductService service=new ProductService();
+		ProductService service = new ProductService();
 		service.submitOrder(order);
 		request.getSession().setAttribute("order", order);
-		response.sendRedirect(request.getContextPath()+"/order_info.jsp");
+		response.sendRedirect(request.getContextPath() + "/order_info.jsp");
 	}
 
 	// 清空购物车

@@ -3,10 +3,12 @@ package com.anywell.dao;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.anywell.domain.Category;
@@ -14,6 +16,7 @@ import com.anywell.domain.Order;
 import com.anywell.domain.OrderItem;
 import com.anywell.domain.Product;
 import com.anywell.utils.DataSourceUtils;
+import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
 
 public class ProductDao {
 
@@ -89,5 +92,27 @@ public class ProductDao {
 		QueryRunner runner = new QueryRunner(DataSourceUtils.getDataSource());
 		String sql = "update orders set state=? where oid=?";
 		runner.update(sql, 1, r6_Order);
+	}
+
+	public List<Order> findAllOrders(String uid, int currentPage, int currentCont) throws SQLException {
+		// TODO Auto-generated method stub
+		int index = (currentPage - 1) * currentCont;
+		QueryRunner queryRunner = new QueryRunner(DataSourceUtils.getDataSource());
+		String sql = "select * from orders where uid=? limit ?,?";
+		return queryRunner.query(sql, new BeanListHandler<Order>(Order.class), uid, index, currentCont);
+	}
+
+	public int getOrdersCount() throws SQLException {
+		QueryRunner queryRunner = new QueryRunner(DataSourceUtils.getDataSource());
+		String sql = "select count(*) from orders ";
+		Long count = (Long) queryRunner.query(sql, new ScalarHandler());
+		return count.intValue();
+	}
+
+	public List<Map<String, Object>> findAllOrderItems(String oid) throws SQLException {
+		// TODO Auto-generated method stub
+		QueryRunner queryRunner = new QueryRunner(DataSourceUtils.getDataSource());
+		String sql = "select * from orderitem o,product p where o.pid=p.pid and oid=? ";
+		return queryRunner.query(sql, new MapListHandler(), oid);
 	}
 }
