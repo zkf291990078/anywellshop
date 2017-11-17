@@ -113,5 +113,23 @@ public class ProductService {
 			}
 		}
 	}
+	public void updateOrderAdrr(Order order) {
+		ProductDao dao = new ProductDao();
+		try {
+			dao.updateOrderAdrr(order);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void updateOrderState(String r6_Order) {
+		// TODO Auto-generated method stub
+		ProductDao dao = new ProductDao();
+		try {
+			dao.updateOrderState(r6_Order);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 }

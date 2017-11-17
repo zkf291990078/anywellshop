@@ -1,24 +1,27 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 
 <
 <script type="text/javascript">
-$(function(){
-var content="";
-$.post(
-	"${pageContext.request.contextPath}/product?method=categoryList", 
-	function(data){
-		for(var i=0; i<data.length;i++){
-			content+="<li><a href='${pageContext.request.contextPath}/product?method=productListBycid&cid="+data[i].cid+"'>"+data[i].cname+"</a></li>";
-		}
-		$("#categoryUl").html(content);
-	},
-	"json"
-		);
-		
-});
-	
+	$(function() {
+		var content = "";
+		$
+				.post(
+						"${pageContext.request.contextPath}/product?method=categoryList",
+						function(data) {
+							for (var i = 0; i < data.length; i++) {
+								content += "<li><a href='${pageContext.request.contextPath}/product?method=productListBycid&cid="
+										+ data[i].cid
+										+ "'>"
+										+ data[i].cname
+										+ "</a></li>";
+							}
+							$("#categoryUl").html(content);
+						}, "json");
+
+	});
 </script>
 
 <!-- 登录 注册 购物车... -->
@@ -31,8 +34,13 @@ $.post(
 	</div>
 	<div class="col-md-3" style="padding-top: 20px">
 		<ol class="list-inline">
-			<li><a href="login.jsp">登录</a></li>
-			<li><a href="register.jsp">注册</a></li>
+			<c:if test="${empty user }">
+				<li><a href="login.jsp">登录</a></li>
+				<li><a href="register.jsp">注册</a></li>
+			</c:if>
+			<c:if test="${!empty user }">
+			您好，${user.username }
+			</c:if>
 			<li><a href="cart.jsp">购物车</a></li>
 			<li><a href="order_list.jsp">我的订单</a></li>
 		</ol>
@@ -58,7 +66,7 @@ $.post(
 			<div class="collapse navbar-collapse"
 				id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav" id="categoryUl">
-					
+
 				</ul>
 				<form class="navbar-form navbar-right" role="search">
 					<div class="form-group">

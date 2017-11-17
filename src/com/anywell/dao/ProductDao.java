@@ -77,4 +77,17 @@ public class ProductDao {
 		queryRunner.update(conn, sql, order.getOid(), order.getOrdertime(), order.getTotal(), order.getState(),
 				order.getAddress(), order.getName(), order.getTelephone(), order.getUser().getUid());
 	}
+
+	public void updateOrderAdrr(Order order) throws SQLException {
+		// TODO Auto-generated method stub
+		QueryRunner queryRunner = new QueryRunner(DataSourceUtils.getDataSource());
+		String sql = "update orders set address=?,telephone=?,name=? where oid=? ";
+		queryRunner.update(sql, order.getAddress(), order.getTelephone(), order.getName(), order.getOid());
+	}
+
+	public void updateOrderState(String r6_Order) throws SQLException {
+		QueryRunner runner = new QueryRunner(DataSourceUtils.getDataSource());
+		String sql = "update orders set state=? where oid=?";
+		runner.update(sql, 1, r6_Order);
+	}
 }
