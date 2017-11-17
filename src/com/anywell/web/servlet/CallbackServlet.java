@@ -14,7 +14,7 @@ import com.anywell.utils.PaymentUtil;
 /**
  * Servlet implementation class CallbackServlet
  */
-public class CallbackServlet extends BaseServlet {
+public class CallbackServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
   
 	/**
