@@ -39,7 +39,7 @@
 				<li><a href="register.jsp">注册</a></li>
 			</c:if>
 			<c:if test="${!empty user }">
-			您好，${user.username }
+			您好，${user.username } ,<a href="${pageContext.request.contextPath}/user?method=logout">退出</a>
 			</c:if>
 			<li><a href="cart.jsp">购物车</a></li>
 			<li><a href="${pageContext.request.contextPath}/product?method=orderList&currentPage=1">我的订单</a></li>
